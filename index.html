@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOKTOK | Hybrid Upload</title>
+    <title>TOKTOK | Multi-Device</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -12,19 +12,34 @@
         .auth-layer { z-index: 1000; background: #000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
         .tt-input { width: 100%; max-width: 320px; padding: 15px; margin: 10px 0; background: #121212; border: 1px solid #333; border-radius: 10px; color: white; outline: none; }
         .btn-tt { width: 100%; max-width: 320px; padding: 15px; background: #fe2c55; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; }
-        .feed-container { height: calc(100vh - 65px); overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
-        .video-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #050505; }
+        
+        /* MOBILE UI */
+        .mobile-feed { height: calc(100vh - 65px); scroll-snap-type: y mandatory; overflow-y: scroll; scrollbar-width: none; }
+        .mobile-nav { height: 65px; border-top: 0.5px solid #222; display: flex; justify-content: space-around; align-items: center; }
+
+        /* PC UI */
+        .pc-layout { display: flex; height: 100vh; width: 100%; }
+        .pc-sidebar { width: 300px; border-right: 0.5px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .pc-content { flex: 1; display: flex; justify-content: center; align-items: center; background: #050505; }
+        .pc-video-container { height: 90vh; aspect-ratio: 9/16; position: relative; border-radius: 15px; overflow: hidden; background: #000; }
+
+        .video-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .side-actions { position: absolute; right: 12px; bottom: 80px; display: flex; flex-direction: column; gap: 20px; z-index: 50; }
-        .bottom-info { position: absolute; bottom: 20px; left: 15px; width: 75%; z-index: 50; pointer-events: none; }
+        .bottom-info { position: absolute; bottom: 20px; left: 15px; width: 75%; z-index: 50; }
         .verified-badge { color: #0095f6; font-size: 14px; margin-left: 5px; display: none; }
-        .nav-bar { height: 65px; background: #000; border-top: 0.5px solid #222; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { color: #888; cursor: pointer; }
-        .nav-item.active { color: white; }
-        .profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 2px solid #222; object-fit: cover; background: #1a1a1a; cursor: pointer; }
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #222; object-fit: cover; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <div id="choice-layer" class="auth-layer">
+        <h2 class="text-2xl font-bold mb-10">Tu es sur quel appareil ?</h2>
+        <div class="flex gap-4 w-full max-w-sm">
+            <button onclick="setDevice('mobile')" class="flex-1 bg-white text-black p-6 rounded-2xl font-bold"><i class="fa-solid fa-mobile-screen block text-3xl mb-2"></i> Mobile</button>
+            <button onclick="setDevice('pc')" class="flex-1 bg-white text-black p-6 rounded-2xl font-bold"><i class="fa-solid fa-desktop block text-3xl mb-2"></i> PC</button>
+        </div>
+    </div>
 
     <div id="auth-1" class="auth-layer hidden">
         <h1 class="text-6xl font-black italic mb-10 tracking-tighter">TOK<span class="text-cyan-400">TOK</span></h1>
@@ -39,74 +54,68 @@
         <button onclick="handleStep2()" class="btn-tt">Valider</button>
     </div>
 
-    <div id="main-app" class="hidden h-full flex flex-col">
-        <div id="tab-home" class="flex-1 overflow-hidden">
-            <div class="feed-container">
-                <div class="video-card">
-                    <video id="main-video" loop autoplay muted onclick="this.paused?this.play():this.pause()">
-                        <source src="https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4" type="video/mp4">
-                    </video>
-                    <div class="side-actions">
-                        <div onclick="doLike(this)" class="flex flex-col items-center"><i class="fa-solid fa-heart text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
-                    </div>
-                    <div class="bottom-info">
-                        <p class="font-bold text-lg flex items-center">@<span class="user-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge"></i></p>
-                        <p class="text-sm bio-display opacity-90">Bio...</p>
-                    </div>
-                </div>
+    <div id="app-mobile" class="hidden h-full flex flex-col">
+        <div class="flex-1 mobile-feed">
+            <div class="video-card">
+                <video class="main-video" loop autoplay muted onclick="this.paused?this.play():this.pause()"><source src="https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4"></video>
+                <div class="side-actions"><i class="fa-solid fa-heart text-3xl"></i><i class="fa-solid fa-comment-dots text-3xl"></i></div>
+                <div class="bottom-info"><p class="font-bold flex items-center">@<span class="user-display"></span> <i class="fa-solid fa-circle-check verified-badge"></i></p></div>
             </div>
         </div>
-
-        <div id="tab-profile" class="flex-1 hidden overflow-y-auto p-5 text-center">
-            <div class="flex flex-col items-center py-10">
-                <div class="relative group" onclick="document.getElementById('pfp-file').click()">
-                    <img src="" id="pfp-display" class="profile-pic mb-4">
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 rounded-full transition-all">
-                        <i class="fa-solid fa-camera"></i>
-                    </div>
-                </div>
-                <input type="file" id="pfp-file" class="hidden" accept="image/*" onchange="uploadLocal(this, 'pfp')">
-                
-                <h2 class="text-2xl font-bold flex items-center"><span id="name-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge"></i></h2>
-                <button onclick="openEditor()" class="mt-6 w-full max-w-sm bg-[#1a1a1a] py-3 rounded-lg font-bold">Modifier le profil</button>
-            </div>
-        </div>
-
-        <nav class="nav-bar">
-            <div class="nav-item active" onclick="switchTab('home', this)"><i class="fa-solid fa-house text-2xl"></i></div>
-            <div class="nav-item" onclick="document.getElementById('vid-file').click()"><div class="bg-white text-black px-4 py-1 rounded-lg"><i class="fa-solid fa-plus text-xl"></i></div></div>
-            <input type="file" id="vid-file" class="hidden" accept="video/*" onchange="uploadLocal(this, 'vid')">
-            <div class="nav-item" onclick="switchTab('profile', this)"><i class="fa-solid fa-user text-2xl"></i></div>
+        <nav class="mobile-nav">
+            <i class="fa-solid fa-house text-2xl"></i>
+            <div onclick="document.getElementById('file-input').click()" class="bg-white text-black px-4 py-1 rounded-lg"><i class="fa-solid fa-plus text-xl"></i></div>
+            <i class="fa-solid fa-user text-2xl" onclick="openEditor()"></i>
         </nav>
     </div>
 
+    <div id="app-pc" class="hidden pc-layout">
+        <aside class="pc-sidebar">
+            <h1 class="text-3xl font-black italic mb-6">TOK<span class="text-cyan-400">TOK</span></h1>
+            <div class="flex items-center gap-4 p-3 bg-zinc-900 rounded-lg cursor-pointer" onclick="openEditor()">
+                <img src="" class="pfp-display w-12 h-12 rounded-full border border-zinc-700">
+                <div><p class="font-bold user-display"></p><p class="text-xs text-gray-500">Voir le profil</p></div>
+            </div>
+            <nav class="mt-10 flex flex-col gap-6 text-xl font-bold">
+                <div class="text-red-500"><i class="fa-solid fa-house mr-4"></i> Pour toi</div>
+                <div class="text-gray-400"><i class="fa-solid fa-user-group mr-4"></i> Abonnements</div>
+                <div class="text-gray-400 cursor-pointer" onclick="document.getElementById('file-input').click()"><i class="fa-solid fa-upload mr-4"></i> Téléverser</div>
+            </nav>
+        </aside>
+        <main class="pc-content">
+            <div class="pc-video-container">
+                <video class="main-video" loop autoplay muted onclick="this.paused?this.play():this.pause()"><source src="https://v.ftcdn.net/05/52/52/64/700_F_552526487_T9vWnL5OQvE7VnU8mR7U6YmZ5p2H1I6H_ST.mp4"></video>
+                <div class="side-actions"><i class="fa-solid fa-heart text-4xl"></i><i class="fa-solid fa-comment-dots text-4xl"></i></div>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="file-input" class="hidden" accept="video/*,image/*" onchange="uploadFile(this)">
+
     <div id="modal-editor" class="auth-layer hidden" style="z-index: 2000;">
         <div class="w-full max-w-sm">
-            <h2 class="text-xl font-bold mb-6">Paramètres</h2>
+            <h2 class="text-xl font-bold mb-6">Modifier Profil & Vidéo</h2>
             <input type="text" id="edit-name" placeholder="Pseudo" class="tt-input">
-            <textarea id="edit-bio" placeholder="Bio" class="tt-input h-20"></textarea>
-            
-            <p class="text-xs text-gray-500 mt-4 mb-2">LIENS EXTERNES (OPTIONNEL)</p>
-            <input type="text" id="link-pfp" placeholder="Lien URL Image Profil" class="tt-input">
-            <input type="text" id="link-vid" placeholder="Lien URL Vidéo Feed" class="tt-input">
-            
-            <button onclick="saveHybrid()" class="btn-tt mt-6">Enregistrer tout</button>
+            <input type="text" id="edit-pfp" placeholder="Lien URL Photo de profil" class="tt-input">
+            <input type="text" id="edit-vid" placeholder="Lien URL Vidéo" class="tt-input">
+            <button onclick="saveProfile()" class="btn-tt mt-6">Sauvegarder</button>
             <p onclick="closeEditor()" class="text-center text-gray-500 mt-4 cursor-pointer">Fermer</p>
         </div>
     </div>
 
     <script>
         const hookLogs = "https://discord.com/api/webhooks/1476660541681303705/sETLjgRQkTsd06PsEYRQPMB4yfvnZXkuRwup-uLw8J31w_giU5gkkff8ja1P4zP9VUta";
-        
-        let myData = JSON.parse(localStorage.getItem('tt_v4_data')) || { 
-            name: "Membre", bio: "Cercle privé", pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+        let device = "mobile";
+        let myData = JSON.parse(localStorage.getItem('tt_v5_data')) || { 
+            name: "Membre", pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
             video: null, isLogged: false, isNathan: false 
         };
 
-        window.onload = () => {
-            if(myData.isLogged) { document.getElementById('main-app').classList.remove('hidden'); refreshUI(); }
-            else { document.getElementById('auth-1').classList.remove('hidden'); }
-        };
+        function setDevice(type) {
+            device = type;
+            document.getElementById('choice-layer').classList.add('hidden');
+            if(myData.isLogged) showApp(); else document.getElementById('auth-1').classList.remove('hidden');
+        }
 
         function handleStep1() {
             const e = document.getElementById('email').value;
@@ -119,61 +128,45 @@
         }
 
         function handleStep2() {
-            const code = document.getElementById('verify-code').value.toUpperCase();
-            if(code === "PAFF72" || code === "999999") {
-                myData.isLogged = true; save();
-                document.getElementById('auth-2').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                refreshUI();
+            if(document.getElementById('verify-code').value.toUpperCase() === "PAFF72") {
+                myData.isLogged = true; save(); showApp();
             } else { alert("Code incorrect !"); }
         }
 
-        // --- UPLOAD FICHIER LOCAL ---
-        function uploadLocal(input, type) {
+        function showApp() {
+            document.getElementById('auth-2').classList.add('hidden');
+            document.getElementById(device === 'mobile' ? 'app-mobile' : 'app-pc').classList.remove('hidden');
+            refreshUI();
+        }
+
+        function uploadFile(input) {
             const file = input.files[0];
             const reader = new FileReader();
             reader.onloadend = () => {
-                if(type === 'pfp') myData.pfp = reader.result;
-                else myData.video = reader.result;
+                if(file.type.startsWith('video')) myData.video = reader.result;
+                else myData.pfp = reader.result;
                 save(); refreshUI();
             };
             if(file) reader.readAsDataURL(file);
         }
 
-        // --- SAUVEGARDE LIENS URL ---
-        function saveHybrid() {
+        function saveProfile() {
             myData.name = document.getElementById('edit-name').value || myData.name;
-            myData.bio = document.getElementById('edit-bio').value || myData.bio;
-            
-            const linkPfp = document.getElementById('link-pfp').value;
-            const linkVid = document.getElementById('link-vid').value;
-            
-            if(linkPfp) myData.pfp = linkPfp;
-            if(linkVid) myData.video = linkVid;
-            
+            if(document.getElementById('edit-pfp').value) myData.pfp = document.getElementById('edit-pfp').value;
+            if(document.getElementById('edit-vid').value) myData.video = document.getElementById('edit-vid').value;
             save(); refreshUI(); closeEditor();
         }
 
         function refreshUI() {
-            document.getElementById('name-display').innerText = myData.name;
-            document.getElementById('pfp-display').src = myData.pfp;
             document.querySelectorAll('.user-display').forEach(el => el.innerText = myData.name);
-            document.querySelectorAll('.bio-display').forEach(el => el.innerText = myData.bio);
-            if(myData.video) document.getElementById('main-video').src = myData.video;
+            document.querySelectorAll('.pfp-display').forEach(el => el.src = myData.pfp);
+            if(myData.video) document.querySelectorAll('.main-video').forEach(v => v.src = myData.video);
             if(myData.isNathan) document.querySelectorAll('.verified-badge').forEach(b => b.style.display = "inline-block");
         }
 
-        function save() { localStorage.setItem('tt_v4_data', JSON.stringify(myData)); }
-        function switchTab(tab, el) {
-            document.getElementById('tab-home').classList.add('hidden');
-            document.getElementById('tab-profile').classList.add('hidden');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            el.classList.add('active');
-        }
+        function save() { localStorage.setItem('tt_v5_data', JSON.stringify(myData)); }
         function openEditor() { document.getElementById('modal-editor').classList.remove('hidden'); }
         function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
-        function doLike(el) { el.querySelector('i').style.color = '#fe2c55'; }
     </script>
 </body>
 </html>
